@@ -1,12 +1,14 @@
 /**
- * 读xml文件
+ * 读xml文件，兼容IE、Firefox、Chrome浏览器。当使用chrome浏览器时应确保该代码存放在服务器端.
+ * <br/>如果需要直接在Chrome浏览器中运行，需要在使用 <blockquote>`chrome.exe
+ * --allow-file-access-from-files`</blockquote> 来启动浏览器，否则无法在chrome浏览中无法读入xml文件
  * 
- * @returns {object.<Document>}
+ * @returns {Doccumnt Object} xml文档对象
  */
 function loadxml() {
+	var start = +new Date();
 	var oXmlDom = XmlDom();
 	if (typeof (oXmlDom.load) == 'undefined') {
-		console.log('fdafasd');
 		var xmlhttp = new XMLHttpRequest();
 		/*
 		 * when set async eq true and load local xml file, the chrome will throw
@@ -23,6 +25,8 @@ function loadxml() {
 	} else {
 		oXmlDom.load("areadata.xml");
 	}
+	var end = +new Date();
+	console.log("load xml spend : " + (end - start) + " ms");
 	return oXmlDom;
 }
 /**
@@ -114,6 +118,7 @@ HtmlSelect.prototype.addOption = function(sVal, sText) {
  */
 HtmlSelect.prototype.cleanOptions = function() {
 	if (this.select && this.select.options.length != 0) {
+		// 需要从最后一个option进行清除，否则会发生异常
 		for ( var i = this.select.options.length - 1; i >= 0; i--) {
 			this.select.remove(this.select.options[i]);
 		}
@@ -130,36 +135,42 @@ HtmlSelect.prototype.showHtml = function(offset) {
 	var op = document.getElementById(offset);
 	op.appendChild(this.select);
 };
+
 /**
- * 省市地区联动菜单类
+ * 联动菜单基类
  * 
  * @param {string}
- *            sOffset 位置
+ *            sOffset select标签存放位置
+ * @param {String}
+ *            sId select标签id属性
  * @param {string}
- *            sName 菜单名
+ *            sName select标签name属性
  * @param {string}
- *            sVal 菜单值
+ *            sVal select标签默认选项
  * @constructor
- * @returns {ProvinceAndCityLink}
+ * @returns {LinkageMenu}
  */
-function ProvinceAndCityLink(sOffset, sName, sVal) {
-	this.xml = loadxml();
+function LinkageMenu(sOffset, sId, sName, sVal) {
+	// 保证area.xml文件只被加载一次
+	this.xml = LinkageMenu.xml ? LinkageMenu.xml : loadxml();
 	this.offset = sOffset;
-	this.id = "id_" + (new Date()).getTime();
+	this.id = sId;
 	this.name = sName;
 	this.val = sVal;
-	/**
-	 * @type {HtmlSelect}
-	 */
 	this.htmlSelect = new HtmlSelect(this.id, this.name, this.val);
 }
+/**
+ * 伪静态areadata.xml数据变量
+ */
+LinkageMenu.xml = loadxml();
+
 /**
  * 初始化数据并显示在页面指定元素中
  * 
  * @param {string}
  *            xPath xPath表达式
  */
-ProvinceAndCityLink.prototype.init = function(xPath) {
+LinkageMenu.prototype.init = function(xPath) {
 	var xmlData = this.xml.documentElement.selectNodes(xPath);
 	if (!this.val && xmlData[0]) {// 如果没有默认值，则将第一个元素设置为默认值
 		this.val = xmlData[0].getAttribute("name");
@@ -178,8 +189,8 @@ ProvinceAndCityLink.prototype.init = function(xPath) {
  *            xPath 新数据 xPath 表达式
  * @returns
  */
-ProvinceAndCityLink.prototype.change = function(xPath) {
-	var oLink = ProvinceAndCityLink["link_" + this.id];// 获取onchange方法的绑定对象
+LinkageMenu.prototype.change = function() {
+	var oLink = LinkageMenu["link_" + this.id];// 获取onchange方法的绑定对象
 	oLink.htmlSelect.cleanOptions();
 
 	var sXpath = oLink.xPath.replace("&var", this.value);// 替换xPath中的变量部分
@@ -188,8 +199,7 @@ ProvinceAndCityLink.prototype.change = function(xPath) {
 		oLink.htmlSelect.addOption(xmlData[i].getAttribute("name"), xmlData[i]
 				.getAttribute("name"));
 	}
-
-	var oLinkedLink = ProvinceAndCityLink["link_" + oLink.id];// 获取被绑定对象onchange绑定的对象
+	var oLinkedLink = LinkageMenu["link_" + oLink.id];// 获取被绑定对象onchange绑定的对象
 	if (oLinkedLink) {
 		oLinkedLink.htmlSelect.cleanOptions();
 		var data = xmlData[0].childNodes;
@@ -207,19 +217,21 @@ ProvinceAndCityLink.prototype.change = function(xPath) {
  * @param {string}
  *            sOffset 显示位置
  * @param {string}
- *            sName 变量名
+ *            sId select元素的id属性
  * @param {string}
- *            sVal 变量值
+ *            sName select元素的name属性
+ * @param {string}
+ *            sVal select元素默认选中值
  * @constructor
- * @extends {ProvinceAndCityLink}
+ * @extends {LinkageMenu}
  * @returns {Province}
  */
-function Province(sOffset, sName, sVal) {
-	ProvinceAndCityLink.call(this, sOffset, sName, sVal);
+function Province(sOffset, sId, sName, sVal) {
+	LinkageMenu.call(this, sOffset, sId, sName, sVal);
 	this.xPath = "//province";
 	this.init(this.xPath);
 }
-Province.prototype = new ProvinceAndCityLink();
+Province.prototype = new LinkageMenu();
 
 /**
  * 省市联动
@@ -229,7 +241,7 @@ Province.prototype = new ProvinceAndCityLink();
  */
 Province.prototype.linkCity = function(oCity) {
 	oCity.xPath = "//province[@name='&var']/city";
-	ProvinceAndCityLink["link_" + this.id] = oCity;// 指定当前province绑定的city
+	LinkageMenu["link_" + this.id] = oCity;// 指定当前province绑定的city
 	this.htmlSelect.select.onchange = this.change;
 	if (this.val) {
 		var sXpath = oCity.xPath.replace("&var", this.val);
@@ -242,9 +254,11 @@ Province.prototype.linkCity = function(oCity) {
  * @param {string}
  *            sOffset 显示位置
  * @param {string}
- *            sName 变量名
+ *            sId select元素的id属性
  * @param {string}
- *            sVal 变量值
+ *            sName select元素name属性
+ * @param {string}
+ *            sVal select元素默认选中值
  * @param {boolean|undefined|null}
  *            isInit
  *            <ul>
@@ -253,17 +267,17 @@ Province.prototype.linkCity = function(oCity) {
  *            <li>如果是构造联动菜单，则需要将该变量设置为false</li>
  *            </ul>
  * @constructor
- * @extends {ProvinceAndCityLink}
+ * @extends {LinkageMenu}
  * @returns {City}
  */
-function City(sOffset, sName, sVal, isInit) {
-	ProvinceAndCityLink.call(this, sOffset, sName, sVal);
+function City(sOffset, sId, sName, sVal, isInit) {
+	LinkageMenu.call(this, sOffset, sId, sName, sVal);
 	this.xPath = "//city";
 	if (isInit) {
 		this.init(this.xPath);
 	}
 }
-City.prototype = new ProvinceAndCityLink();
+City.prototype = new LinkageMenu();
 /**
  * 市区联动
  * 
@@ -272,7 +286,7 @@ City.prototype = new ProvinceAndCityLink();
  */
 City.prototype.linkArea = function(oArea) {
 	oArea.xPath = "//city[@name='&var']/country";
-	ProvinceAndCityLink["link_" + this.id] = oArea;// // 指定当前city绑定的area
+	LinkageMenu["link_" + this.id] = oArea;// // 指定当前city绑定的area
 	this.htmlSelect.select.onchange = this.change;
 	if (this.val) {
 		oArea.htmlSelect.cleanOptions();
@@ -286,9 +300,11 @@ City.prototype.linkArea = function(oArea) {
  * @param {string}
  *            sOffset 显示位置
  * @param {string}
- *            sName 变量名
+ *            sId select元素的id属性
  * @param {string}
- *            sVal 变量值
+ *            sName select元素name属性
+ * @param {string}
+ *            sVal select元素默认选中值
  * @param {boolean|undefined|null}
  *            isInit
  *            <ul>
@@ -297,14 +313,14 @@ City.prototype.linkArea = function(oArea) {
  *            <li>如果是构造联动菜单，则需要将该变量设置为false</li>
  *            </ul>
  * @constructor
- * @extends {ProvinceAndCityLink}
+ * @extends {LinkageMenu}
  * @returns {Area}
  */
-function Area(sOffset, sName, sVal, isInit) {
-	ProvinceAndCityLink.call(this, sOffset, sName, sVal);
+function Area(sOffset, sId, sName, sVal, isInit) {
+	LinkageMenu.call(this, sOffset, sId, sName, sVal);
 	this.xPath = "//country";
 	if (isInit) {
 		this.init(this.xPath);
 	}
 }
-Area.prototype = new ProvinceAndCityLink();
+Area.prototype = new LinkageMenu();
