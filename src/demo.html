@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>省市区联动菜单</title>
+<script type="text/javascript" src="loadxml.js"></script>
+<script type="text/javascript" src="areaselected.js"></script>
+<script type="text/javascript">
+	window.onload = function() {
+		//单独取省(无默认值)
+		var singleProN = new Province('single_pro_n', 'sp1');
+		//单独取省(有默认值)
+		var singleProY = new Province('single_pro_y', 'sp2', '吉林省');
+
+		//单独取市(无默认值)
+		var singleCityN = new City('single_cit_n', 'sc1', '', true);
+		//单独取市(有默认值)
+		var singleCityY = new City('single_cit_y', 'sc2', '天津辖区', true);
+
+		// 信息量大，因此在加载的时候比较慢，不过FF相对于IE比较快
+		//单独取地区(无默认值)
+		var singleAreaN = new Area('single_area_n', 'sa1', '', true);
+		//单独取地区(有默认值)
+		var singleAreaY = new Area('single_area_y', 'sa2', '海淀区', true);
+
+		//省市联动（无默认值）
+		var pcProN = new Province('pc_p_n', 'pcp1');
+		var pcCityN = new City('pc_c_n', 'pcc1');
+		pcProN.linkCity(pcCityN);
+		//省市联动（有默认值）
+		var pcProY = new Province('pc_p_y', 'pcp2', "江苏省");
+		var pcCityY = new City('pc_c_y', 'pcc2', "常州市");
+		pcProY.linkCity(pcCityY);
+
+		//市地区联动(无默认值)
+		var caCityN = new City('ca_c_n', 'cac1', '', true);
+		var caAreaN = new Area('ca_a_n', 'caa1');
+		caCityN.linkArea(caAreaN);
+		//市地区联动(有默认值)
+		var caCityY = new City('ca_c_y', 'cac2', "唐山市", true);
+		var caAreaY = new Area('ca_a_y', 'caa2', '丰南区');
+		caCityY.linkArea(caAreaY);
+
+		//省市地区联动（无默认值）
+		var lp = new Province('lp', 'lp');
+		var lc = new City('lc', 'lc');
+		var la = new Area('la', 'la', '', false);
+		lp.linkCity(lc);
+		lc.linkArea(la);
+
+		//省市地区联动（有默认值）
+		var lp1 = new Province('lp1', 'lp1', '湖南省');
+		var lc1 = new City('lc1', 'lc1', '湘潭市');
+		var la1 = new Area('la1', 'la1', '', false);
+		lp1.linkCity(lc1);
+		lc1.linkArea(la1);
+
+	}
+</script>
+</head>
+<body>
+<fieldset><legend>单独取省</legend> 无默认值： <span id="single_pro_n"></span>
+有默认值： <span id="single_pro_y"></span></fieldset>
+<br />
+<fieldset><legend>单独取市</legend> 无默认值： <span id="single_cit_n"></span>
+有默认值: <span id="single_cit_y"></span></fieldset>
+<br />
+<fieldset><legend>单独取地区</legend> 无默认值： <span
+	id="single_area_n"></span> 有默认值: <span id="single_area_y"></span></fieldset>
+<br />
+<fieldset><legend>省市联动</legend> 无默认值： <span id="pc_p_n"></span><span
+	id="pc_c_n"></span> 有默认值: <span id="pc_p_y"></span><span id="pc_c_y"></span>
+</fieldset>
+<br />
+<fieldset><legend>市地区联动</legend> 无默认值： <span id="ca_c_n"></span><span
+	id="ca_a_n"></span> 有默认值: <span id="ca_c_y"></span><span id="ca_a_y"></span>
+</fieldset>
+<br />
+<fieldset><legend>市地区联动</legend> 无默认值： <span id="lp"></span><span
+	id="lc"></span> <span id="la"></span> 有默认值: <span id="lp1"></span><span
+	id="lc1"></span><span id="la1"></span></fieldset>
+</body>
+</html>
