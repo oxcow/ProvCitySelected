@@ -5,7 +5,7 @@
 	<property name="src.dir" value="./src" />
 
 	<property name="projectName" value="AreaSeleted" />
-	<property name="version" value="0.1" />
+	<property name="version" value="0.1beta" />
 
 	<property name="js.name" value="${projectName}-${version}.js" />
 	<property name="js.min.name" value="${projectName}-${version}.min.js" />
