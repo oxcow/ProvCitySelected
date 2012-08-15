@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="AreaSeleted" basedir="." default="js.min">
+
+	<property name="build.dir" value="./build" />
+	<property name="src.dir" value="./src" />
+
+	<property name="projectName" value="AreaSeleted" />
+	<property name="version" value="0.1" />
+
+	<property name="js.name" value="${projectName}-${version}.js" />
+	<property name="js.min.name" value="${projectName}-${version}.min.js" />
+	<property name="closure-jar" value="./libs/compiler.jar" />
+
+	<!-- 清理build目录下的 *.js文件 -->
+	<target name="js.clean">
+		<delete dir="${build.dir}" />
+	</target>
+
+
+	<target name="js.copy">
+		<copy todir="${build.dir}">
+			<fileset dir="${src.dir}">
+				<include name="areadata.xml" />
+				<include name="demo.html" />
+			</fileset>
+		</copy>
+	</target>
+
+
+	<!-- 按顺序连接js代码到一个文件 -->
+	<target name="js.concatenate" depends="js.clean">
+		<echo message="build.dir = ${build.dir}" />
+		<echo message="src.dir = ${src.dir}" />
+		<mkdir dir="${build.dir}" />
+		<concat destfile="${build.dir}/${js.name}" fixlastline="yes">
+			<filelist dir="${src.dir}">
+				<file name="loadxml.js" />
+				<file name="areaselected.js" />
+			</filelist>
+		</concat>
+	</target>
+
+	<!-- 使用Google Closure Compiler 压缩js文件 -->
+	<target name="js.min" depends="js.concatenate,js.copy">
+		<echo message="version = ${version}" />
+		<apply executable="java" parallel="false">
+			<fileset dir="${build.dir}">
+				<include name="${js.name}" />
+			</fileset>
+			<!-- command  java -jar compiler.jar \-\-js hello.js \-\-js_output_file hello-compiled.js -->
+			<arg line="-jar" />
+			<arg path="${closure-jar}" />
+			<arg value="--warning_level" />
+			<arg value="QUIET" />
+			<arg value="--compilation_level" />
+			<arg value="SIMPLE_OPTIMIZATIONS" />
+			<arg value="--js_output_file" />
+			<!--
+					以下三句可替换为
+					<arg value="${build.dir}/${js.min.name}" />
+				-->
+			<targetfile />
+			<arg value="--js" />
+			<mapper type="glob" from="*.js" to="${build.dir}/*.min.js" />
+		</apply>
+	</target>
+
+</project>

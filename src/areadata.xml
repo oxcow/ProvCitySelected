@@ -2700,14 +2700,17 @@
 	</province>
 	<province name="海南省">
 		<city name="海口市">
-			
 			<country name="秀英区" />
 			<country name="龙华区" />
 			<country name="琼山区" />
 			<country name="美兰区" />
 		</city>
-		<city name="三亚市">
-			
+		<city name="三亚市"></city>
+		<!-- 2012年7月24日 新设三沙市-->
+		<city name="三沙市">
+			<country name="西沙群岛" />
+			<country name="南沙群岛" />
+			<country name="中沙群岛" />
 		</city>
 		<city name="海南直辖县">
 			<country name="五指山市" />
@@ -2726,9 +2729,11 @@
 			<country name="陵水黎族自治县" />
 			<country name="保亭黎族苗族自治县" />
 			<country name="琼中黎族苗族自治县" />
+			<!--
 			<country name="西沙群岛" />
 			<country name="南沙群岛" />
 			<country name="中沙群岛的岛礁及其海域" />
+			-->
 		</city>
 	</province>
 	<province name="重庆市">
