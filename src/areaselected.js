@@ -206,7 +206,7 @@ LinkageMenu.prototype.change = function() {
 	var xmlData = oLink.xml.documentElement.selectNodes(sXpath);
 
 	for (var i = 0; i < xmlData.length; i++) {
-		var _name = xmlData[j].getAttribute("name");
+		var _name = xmlData[i].getAttribute("name");
 		oLink.htmlSelect.addOption(_name, _name);
 	}
 	var oLinkedLink = LinkageMenu["link_" + oLink.id];
