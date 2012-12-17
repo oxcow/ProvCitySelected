@@ -1,37 +1,40 @@
-/**
+/*
  * 读xml文件，兼容IE、Firefox、Chrome浏览器。当使用chrome浏览器时应确保该代码存放在服务器端.
- * <br/>如果需要直接在Chrome浏览器中运行，需要在使用 <blockquote>`chrome.exe
- * --allow-file-access-from-files`</blockquote> 来启动浏览器，否则无法在chrome浏览中无法读入xml文件
- * 
+ * <br/>如果需要直接在Chrome浏览器中运行，需要在使用
+ * 		<blockquote>`chrome.exe --allow-file-access-from-files`</blockquote>
+ * 来启动浏览器，否则无法在chrome浏览中无法读入xml文件
+ *
  * @returns {Doccumnt Object} xml文档对象
  */
 function loadxml() {
 	var start = +new Date();
 	var oXmlDom = XmlDom();
-	if (typeof (oXmlDom.load) == 'undefined') {
+	if ( typeof (oXmlDom.load) == 'undefined') {
 		var xmlhttp = new XMLHttpRequest();
 		/*
-		 * when set async eq true and load local xml file, the chrome will throw
-		 * excption 'XMLHttpRequest cannot load file:///...areadata.xml. Origin
-		 * null is not allowed by Access-Control-Allow-Origin.' when set async
-		 * eq false and load local xml file will throw exception "Uncaught
-		 * Error: NETWORK_ERR: XMLHttpRequest Exception 101" in addition to the
-		 * above
+		 * when set async eq true and load local xml file,the chrome will throw excption
+		 * "XMLHttpRequest cannot load file:///...areadata.xml.
+		 * 	Origin null is not allowed by Access-Control-Allow-Origin."
+		 *
+		 * when set async eq false and load local xml file,the chrome will throw exception
+		 * "Uncaught Error: NETWORK_ERR: XMLHttpRequest Exception 101" in addition to the above"
+		 *
 		 */
-		xmlhttp.open("GET", "areadata.xml", false);// 同步执行
+		xmlhttp.open("POST", "./areadata.xml", false);
 		xmlhttp.setRequestHeader('Content-Type', 'application/xml');
 		xmlhttp.send(null);
 		oXmlDom = xmlhttp.responseXML;
 	} else {
-		oXmlDom.load("areadata.xml");
+		oXmlDom.load("./areadata.xml");
 	}
 	var end = +new Date();
 	console.log("load xml spend : " + (end - start) + " ms");
 	return oXmlDom;
 }
+
 /**
  * html select 标签类
- * 
+ *
  * @param {string}
  *            sId 标签id
  * @param {string}
@@ -47,9 +50,10 @@ function HtmlSelect(sId, sName, sVal) {
 	this.val = sVal;
 	this.select = this.createSelect_();
 }
+
 /**
  * 创建select元素
- * 
+ *
  * @private
  * @returns {Element} select element
  */
@@ -61,7 +65,7 @@ HtmlSelect.prototype.createSelect_ = function() {
 };
 /**
  * 创建并添加 option 元素
- * 
+ *
  * @param {string}
  *            sVal option 元素 value
  * @param {string}
@@ -114,12 +118,12 @@ HtmlSelect.prototype.addOption = function(sVal, sText) {
 };
 /**
  * 清除 select 元素下所有的 option 元素
- * 
+ *
  */
 HtmlSelect.prototype.cleanOptions = function() {
 	if (this.select && this.select.options.length != 0) {
 		// 需要从最后一个option进行清除，否则会发生异常
-		for ( var i = this.select.options.length - 1; i >= 0; i--) {
+		for (var i = this.select.options.length - 1; i >= 0; i--) {
 			this.select.remove(this.select.options[i]);
 		}
 	}
@@ -127,7 +131,7 @@ HtmlSelect.prototype.cleanOptions = function() {
 
 /**
  * 显示select标签在页面中
- * 
+ *
  * @param {string}
  *            offset select元素父节点id
  */
@@ -138,7 +142,7 @@ HtmlSelect.prototype.showHtml = function(offset) {
 
 /**
  * 联动菜单基类
- * 
+ *
  * @param {string}
  *            sOffset select标签存放位置
  * @param {String}
@@ -159,6 +163,7 @@ function LinkageMenu(sOffset, sId, sName, sVal) {
 	this.val = sVal;
 	this.htmlSelect = new HtmlSelect(this.id, this.name, this.val);
 }
+
 /**
  * 伪静态areadata.xml数据变量
  */
@@ -166,7 +171,7 @@ LinkageMenu.xml = loadxml();
 
 /**
  * 初始化数据并显示在页面指定元素中
- * 
+ *
  * @param {string}
  *            xPath xPath表达式
  */
@@ -176,44 +181,50 @@ LinkageMenu.prototype.init = function(xPath) {
 		this.val = xmlData[0].getAttribute("name");
 		this.htmlSelect.val = this.val;
 	}
-	for ( var i = 0; i < xmlData.length; i++) {
-		this.htmlSelect.addOption(xmlData[i].getAttribute("name"), xmlData[i]
-				.getAttribute("name"));
+	for (var i = 0; i < xmlData.length; i++) {
+		this.htmlSelect.addOption(xmlData[i].getAttribute("name"), xmlData[i].getAttribute("name"));
 	}
 	this.htmlSelect.showHtml(this.offset);
 };
 /**
  * 联动菜单onchange事件
- * 
+ *
  * @param {string}
  *            xPath 新数据 xPath 表达式
  * @returns
  */
 LinkageMenu.prototype.change = function() {
-	var oLink = LinkageMenu["link_" + this.id];// 获取onchange方法的绑定对象
+
+	// 获取onchange方法的绑定对象
+	var oLink = LinkageMenu["link_" + this.id];
+
 	oLink.htmlSelect.cleanOptions();
 
-	var sXpath = oLink.xPath.replace("&var", this.value);// 替换xPath中的变量部分
+	// 替换xPath中的变量部分
+	var sXpath = oLink.xPath.replace("&var", this.value);
+
 	var xmlData = oLink.xml.documentElement.selectNodes(sXpath);
-	for ( var i = 0; i < xmlData.length; i++) {
-		oLink.htmlSelect.addOption(xmlData[i].getAttribute("name"), xmlData[i]
-				.getAttribute("name"));
+
+	for (var i = 0; i < xmlData.length; i++) {
+		var _name = xmlData[i].getAttribute("name");
+		oLink.htmlSelect.addOption(_name, _name);
 	}
-	var oLinkedLink = LinkageMenu["link_" + oLink.id];// 获取被绑定对象onchange绑定的对象
+	var oLinkedLink = LinkageMenu["link_" + oLink.id];
+	// 获取被绑定对象onchange绑定的对象
 	if (oLinkedLink) {
 		oLinkedLink.htmlSelect.cleanOptions();
 		var data = xmlData[0].childNodes;
-		for ( var j = 0; j < data.length; j++) {
+		for (var j = 0; j < data.length; j++) {
 			if (data[j].nodeType == 1) {// ELEMENT_NODE
-				oLinkedLink.htmlSelect.addOption(data[j].getAttribute("name"),
-						data[j].getAttribute("name"));
+				var _name = data[j].getAttribute("name");
+				oLinkedLink.htmlSelect.addOption(_name, _name);
 			}
 		}
 	}
 };
 /**
  * 省份下拉对象
- * 
+ *
  * @param {string}
  *            sOffset 显示位置
  * @param {string}
@@ -231,17 +242,21 @@ function Province(sOffset, sId, sName, sVal) {
 	this.xPath = "//province";
 	this.init(this.xPath);
 }
+
 Province.prototype = new LinkageMenu();
 
 /**
  * 省市联动
- * 
+ *
  * @param {City}
  *            oCity 联动市对象
  */
 Province.prototype.linkCity = function(oCity) {
 	oCity.xPath = "//province[@name='&var']/city";
-	LinkageMenu["link_" + this.id] = oCity;// 指定当前province绑定的city
+
+	// 指定当前province绑定的city
+	LinkageMenu["link_" + this.id] = oCity;
+
 	this.htmlSelect.select.onchange = this.change;
 	if (this.val) {
 		var sXpath = oCity.xPath.replace("&var", this.val);
@@ -250,7 +265,7 @@ Province.prototype.linkCity = function(oCity) {
 };
 /**
  * 市下拉对象
- * 
+ *
  * @param {string}
  *            sOffset 显示位置
  * @param {string}
@@ -266,27 +281,35 @@ Province.prototype.linkCity = function(oCity) {
  *            <li>如果只是构造单独的市下拉菜单，则需要设置该变量为true</li>
  *            <li>如果是构造联动菜单，则需要将该变量设置为false</li>
  *            </ul>
+ * @param {string}
+ *			  province 省份.当该参数为空时，将取出所有省份的城市.否则将只显示该省份下的所有市
+ *
  * @constructor
  * @extends {LinkageMenu}
  * @returns {City}
  */
-function City(sOffset, sId, sName, sVal, isInit) {
+function City(sOffset, sId, sName, sVal, isInit, province) {
 	LinkageMenu.call(this, sOffset, sId, sName, sVal);
-	this.xPath = "//city";
+
+	this.xPath = province ? "//province[@name='" + province + "']/city" : "//city";
+
 	if (isInit) {
 		this.init(this.xPath);
 	}
+
 }
+
 City.prototype = new LinkageMenu();
 /**
  * 市区联动
- * 
+ *
  * @param {Area}
  *            oArea 区对象
  */
 City.prototype.linkArea = function(oArea) {
 	oArea.xPath = "//city[@name='&var']/country";
-	LinkageMenu["link_" + this.id] = oArea;// // 指定当前city绑定的area
+	LinkageMenu["link_" + this.id] = oArea;
+	// // 指定当前city绑定的area
 	this.htmlSelect.select.onchange = this.change;
 	if (this.val) {
 		oArea.htmlSelect.cleanOptions();
@@ -296,7 +319,7 @@ City.prototype.linkArea = function(oArea) {
 };
 /**
  * 地区下拉对象
- * 
+ *
  * @param {string}
  *            sOffset 显示位置
  * @param {string}
@@ -312,15 +335,20 @@ City.prototype.linkArea = function(oArea) {
  *            <li>如果只是构造单独地区下拉菜单，则需要设置该变量为true</li>
  *            <li>如果是构造联动菜单，则需要将该变量设置为false</li>
  *            </ul>
+ * @param {string}
+ * 			  city 市.当该参数为空时,将取出所有省份的城市.否则将只显示该市下的所有地区
  * @constructor
  * @extends {LinkageMenu}
  * @returns {Area}
  */
-function Area(sOffset, sId, sName, sVal, isInit) {
+function Area(sOffset, sId, sName, sVal, isInit, city) {
 	LinkageMenu.call(this, sOffset, sId, sName, sVal);
-	this.xPath = "//country";
+
+	this.xPath = city ? "//city[@name='" + city + "']/country" : "//country";
+
 	if (isInit) {
 		this.init(this.xPath);
 	}
 }
+
 Area.prototype = new LinkageMenu();
