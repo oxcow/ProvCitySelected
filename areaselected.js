@@ -18,7 +18,7 @@ function loadxml() {
 		 * Error: NETWORK_ERR: XMLHttpRequest Exception 101" in addition to the
 		 * above
 		 */
-		xmlhttp.open("POST", "areadata.xml", false);// 同步执行
+		xmlhttp.open("GET", "areadata.xml", false);// 同步执行
 		xmlhttp.setRequestHeader('Content-Type', 'application/xml');
 		xmlhttp.send(null);
 		oXmlDom = xmlhttp.responseXML;
