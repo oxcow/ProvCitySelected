@@ -20,7 +20,7 @@ function loadxml() {
 		 * "Uncaught Error: NETWORK_ERR: XMLHttpRequest Exception 101" in addition to the above"
 		 *
 		 */
-		xmlhttp.open("POST", "./areadata.xml", false);
+		xmlhttp.open("GET", "./areadata.xml", false);
 		xmlhttp.setRequestHeader('Content-Type', 'application/xml');
 		xmlhttp.send(null);
 		oXmlDom = xmlhttp.responseXML;
