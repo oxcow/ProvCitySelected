@@ -1,7 +1,8 @@
 /*
  * 读xml文件，兼容IE、Firefox、Chrome浏览器。当使用chrome浏览器时应确保该代码存放在服务器端.
- * <br/>如果需要直接在Chrome浏览器中运行，需要在使用 <blockquote>`chrome.exe
- * --allow-file-access-from-files`</blockquote> 来启动浏览器，否则无法在chrome浏览中无法读入xml文件
+ * <br/>如果需要直接在Chrome浏览器中运行，需要在使用
+ * 		<blockquote>`chrome.exe --allow-file-access-from-files`</blockquote>
+ * 来启动浏览器，否则无法在chrome浏览中无法读入xml文件
  *
  * @returns {Doccumnt Object} xml文档对象
  */
@@ -20,7 +21,6 @@ function loadxml() {
 		 *
 		 */
 		xmlhttp.open("POST", "areadata.xml", false);
-		// 同步执行
 		xmlhttp.setRequestHeader('Content-Type', 'application/xml');
 		xmlhttp.send(null);
 		oXmlDom = xmlhttp.responseXML;
@@ -204,8 +204,10 @@ LinkageMenu.prototype.change = function() {
 	var sXpath = oLink.xPath.replace("&var", this.value);
 
 	var xmlData = oLink.xml.documentElement.selectNodes(sXpath);
+
 	for (var i = 0; i < xmlData.length; i++) {
-		oLink.htmlSelect.addOption(xmlData[i].getAttribute("name"), xmlData[i].getAttribute("name"));
+		var _name = xmlData[i].getAttribute("name");
+		oLink.htmlSelect.addOption(_name, _name);
 	}
 	var oLinkedLink = LinkageMenu["link_" + oLink.id];
 	// 获取被绑定对象onchange绑定的对象
@@ -214,7 +216,8 @@ LinkageMenu.prototype.change = function() {
 		var data = xmlData[0].childNodes;
 		for (var j = 0; j < data.length; j++) {
 			if (data[j].nodeType == 1) {// ELEMENT_NODE
-				oLinkedLink.htmlSelect.addOption(data[j].getAttribute("name"), data[j].getAttribute("name"));
+				var _name = data[j].getAttribute("name");
+				oLinkedLink.htmlSelect.addOption(_name, _name);
 			}
 		}
 	}
@@ -250,8 +253,10 @@ Province.prototype = new LinkageMenu();
  */
 Province.prototype.linkCity = function(oCity) {
 	oCity.xPath = "//province[@name='&var']/city";
-	LinkageMenu["link_" + this.id] = oCity;
+
 	// 指定当前province绑定的city
+	LinkageMenu["link_" + this.id] = oCity;
+
 	this.htmlSelect.select.onchange = this.change;
 	if (this.val) {
 		var sXpath = oCity.xPath.replace("&var", this.val);
