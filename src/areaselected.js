@@ -27,8 +27,7 @@ function loadxml() {
 	} else {
 		oXmlDom.load("areadata.xml");
 	}
-	var end = +new Date();
-	console.log("load xml spend : " + (end - start) + " ms");
+	console.log(`load xml spend: ${+new Date() - start} ms`);
 	return oXmlDom;
 }
 
@@ -44,102 +43,72 @@ function loadxml() {
  * @constructor
  * @returns {HtmlSelect}
  */
-function HtmlSelect(sId, sName, sVal) {
-	this.id = sId;
-	this.name = sName;
-	this.val = sVal;
-	this.select = this.createSelect_();
-}
-
-/**
- * 创建select元素
- *
- * @private
- * @returns {Element} select element
- */
-HtmlSelect.prototype.createSelect_ = function() {
-	var oSelect = document.createElement("select");
-	oSelect.setAttribute("id", this.id);
-	oSelect.setAttribute("name", this.name);
-	return oSelect;
-};
-/**
- * 创建并添加 option 元素
- *
- * @param {string}
- *            sVal option 元素 value
- * @param {string}
- *            sText option 元素 显示值
- * @returns {Element} option element
- */
-HtmlSelect.prototype.addOption = function(sVal, sText) {
-	/**
-	 * 创建option方法1<br/> 使用该方法IE6\FF下，默认selected不会出现错位
-	 */
-	var option = document.createElement("option");
-	option.appendChild(document.createTextNode(sText));
-	option.setAttribute('value', sVal);
-	if (this.val && sVal == this.val) {
-		option.setAttribute('selected', 'selected');
+class HtmlSelect {
+	constructor(sId, sName, sVal){
+		this.id = sId;
+		this.name = sName;
+		this.val = sVal;
+		this.select = HtmlSelect.CreateSelect(this.id, this.name);
 	}
-
-	this.select.appendChild(option);
-
+ 
 	/**
-	 * 创建option方法2<br/> 使用该方法IE6下，默认selected会出现错位
+	 * 创建并添加 option 元素
+	 *
+	 * @param {string}
+	 *            sVal option 元素 value
+	 * @param {string}
+	 *            sText option 元素 显示值
+	 * @returns {Element} option element
 	 */
+	addOption(sVal,sText){
+		/**
+		 * 创建option方法1<br/> 使用该方法IE6\FF下，默认selected不会出现错位
+		 */
+		var option = document.createElement('option');
+		option.appendChild(document.createTextNode(sText));
+		option.setAttribute('value', sVal);
+		if (this.val && sVal == this.val) {
+			option.setAttribute('selected', 'selected');
+		}
 
-	// var option = null;
-	// if (this.val && sVal == this.val) {
-	// option = new Option(sText, sVal, true, true);
-	// } else {
-	// option = new Option(sText, sVal, false, false);
-	// }
-	// try {
-	// this.select.add(option, null); // standards compliant
-	// } catch (ex) {
-	// this.select.add(option); // IE only
-	// }
+		this.select.appendChild(option);
+	}
 	/**
-	 * 创建option方法2<br/> 使用该方法IE6下，默认selected会出现错位
+	 * 清除 select 元素下所有的 option 元素
+	 *
 	 */
-	// var option = document.createElement("option");
-	// option.value = sVal;
-	// option.text = sText;
-	// if (this.val && sVal == this.val) {
-	// option.setAttribute('selected', 'true');
-	// }
-	// //this.select.appendChild(option);IE6下此时不可用appendChild添加
-	// try {
-	// this.select.add(option, null); // standards compliant
-	// } catch (ex) {
-	// this.select.add(option); // IE only
-	// }
-};
-/**
- * 清除 select 元素下所有的 option 元素
- *
- */
-HtmlSelect.prototype.cleanOptions = function() {
-	if (this.select && this.select.options.length != 0) {
-		// 需要从最后一个option进行清除，否则会发生异常
-		for (var i = this.select.options.length - 1; i >= 0; i--) {
-			this.select.remove(this.select.options[i]);
+	cleanOptions(){
+		if (this.select && this.select.options.length !== 0) {
+			// 需要从最后一个option进行清除，否则会发生异常
+			for (var i = this.select.options.length - 1; i >= 0; i--) {
+				this.select.remove(this.select.options[i]);
+			}
 		}
 	}
-};
+	/**
+	 * 显示select标签在页面中
+	 *
+	 * @param {string}
+	 *            offset select元素父节点id
+	 */
+	showHtml(offset) {
+		document.getElementById(offset).appendChild(this.select);
+	}
 
-/**
- * 显示select标签在页面中
- *
- * @param {string}
- *            offset select元素父节点id
- */
-HtmlSelect.prototype.showHtml = function(offset) {
-	var op = document.getElementById(offset);
-	op.appendChild(this.select);
-};
-
+	/**
+	 * 创建select元素
+	 *
+	 * @private
+	 * @returns {Element} select element
+	 */
+	static CreateSelect(id, name){
+		var oSelect = document.createElement('select');
+		oSelect.setAttribute('id', id);
+		oSelect.setAttribute('name', name);
+		return oSelect;
+	}
+}
+ 
 /**
  * 联动菜单基类
  *
@@ -154,14 +123,71 @@ HtmlSelect.prototype.showHtml = function(offset) {
  * @constructor
  * @returns {LinkageMenu}
  */
-function LinkageMenu(sOffset, sId, sName, sVal) {
-	// 保证area.xml文件只被加载一次
-	this.xml = LinkageMenu.xml ? LinkageMenu.xml : loadxml();
-	this.offset = sOffset;
-	this.id = sId;
-	this.name = sName;
-	this.val = sVal;
-	this.htmlSelect = new HtmlSelect(this.id, this.name, this.val);
+class LinkageMenu{
+	constructor(sOffset, sId, sName, sVal) {
+		this.xml = LinkageMenu.xml ? LinkageMenu.xml : loadxml();
+		this.offset = sOffset;
+		this.id = sId;
+		this.name = sName;
+		this.val = sVal;
+		this.htmlSelect = new HtmlSelect(this.id, this.name, this.val);
+	}
+	/**
+	 * 初始化数据并显示在页面指定元素中
+	 *
+	 * @param {string}
+	 *            xPath xPath表达式
+	 */
+	init(xPath) {
+
+		var xmlData = this.xml.documentElement.selectNodes(xPath);
+
+		if (!this.val && xmlData[0]) {// 如果没有默认值，则将第一个元素设置为默认值
+			this.val = xmlData[0].getAttribute('name');
+			this.htmlSelect.val = this.val;
+		}
+		for (var i = 0; i < xmlData.length; i++) {
+			this.htmlSelect.addOption(xmlData[i].getAttribute('name'), xmlData[i].getAttribute('name'));
+		}
+		this.htmlSelect.showHtml(this.offset);
+		
+	}
+
+	/**
+	 * 联动菜单onchange事件
+	 *
+	 * @param {string}
+	 *            xPath 新数据 xPath 表达式
+	 * @returns
+	 */
+	change(){
+		// 获取onchange方法的绑定对象
+		var oLink = LinkageMenu["link_" + this.id];
+
+		oLink.htmlSelect.cleanOptions();
+
+		// 替换xPath中的变量部分
+		var sXpath = oLink.xPath.replace("&var", this.value);
+
+		var xmlData = oLink.xml.documentElement.selectNodes(sXpath);
+
+		for (var i = 0; i < xmlData.length; i++) {
+			var _name = xmlData[i].getAttribute("name");
+			oLink.htmlSelect.addOption(_name, _name);
+		}
+		var oLinkedLink = LinkageMenu["link_" + oLink.id];
+		// 获取被绑定对象onchange绑定的对象
+		if (oLinkedLink) {
+			oLinkedLink.htmlSelect.cleanOptions();
+			var data = xmlData[0].childNodes;
+			for (var j = 0; j < data.length; j++) {
+				if (data[j].nodeType == 1) {// ELEMENT_NODE
+					var _name = data[j].getAttribute("name");
+					oLinkedLink.htmlSelect.addOption(_name, _name);
+				}
+			}
+		}
+	}
 }
 
 /**
@@ -169,59 +195,6 @@ function LinkageMenu(sOffset, sId, sName, sVal) {
  */
 LinkageMenu.xml = loadxml();
 
-/**
- * 初始化数据并显示在页面指定元素中
- *
- * @param {string}
- *            xPath xPath表达式
- */
-LinkageMenu.prototype.init = function(xPath) {
-	var xmlData = this.xml.documentElement.selectNodes(xPath);
-	if (!this.val && xmlData[0]) {// 如果没有默认值，则将第一个元素设置为默认值
-		this.val = xmlData[0].getAttribute("name");
-		this.htmlSelect.val = this.val;
-	}
-	for (var i = 0; i < xmlData.length; i++) {
-		this.htmlSelect.addOption(xmlData[i].getAttribute("name"), xmlData[i].getAttribute("name"));
-	}
-	this.htmlSelect.showHtml(this.offset);
-};
-/**
- * 联动菜单onchange事件
- *
- * @param {string}
- *            xPath 新数据 xPath 表达式
- * @returns
- */
-LinkageMenu.prototype.change = function() {
-
-	// 获取onchange方法的绑定对象
-	var oLink = LinkageMenu["link_" + this.id];
-
-	oLink.htmlSelect.cleanOptions();
-
-	// 替换xPath中的变量部分
-	var sXpath = oLink.xPath.replace("&var", this.value);
-
-	var xmlData = oLink.xml.documentElement.selectNodes(sXpath);
-
-	for (var i = 0; i < xmlData.length; i++) {
-		var _name = xmlData[i].getAttribute("name");
-		oLink.htmlSelect.addOption(_name, _name);
-	}
-	var oLinkedLink = LinkageMenu["link_" + oLink.id];
-	// 获取被绑定对象onchange绑定的对象
-	if (oLinkedLink) {
-		oLinkedLink.htmlSelect.cleanOptions();
-		var data = xmlData[0].childNodes;
-		for (var j = 0; j < data.length; j++) {
-			if (data[j].nodeType == 1) {// ELEMENT_NODE
-				var _name = data[j].getAttribute("name");
-				oLinkedLink.htmlSelect.addOption(_name, _name);
-			}
-		}
-	}
-};
 /**
  * 省份下拉对象
  *
@@ -237,32 +210,34 @@ LinkageMenu.prototype.change = function() {
  * @extends {LinkageMenu}
  * @returns {Province}
  */
-function Province(sOffset, sId, sName, sVal) {
-	LinkageMenu.call(this, sOffset, sId, sName, sVal);
-	this.xPath = "//province";
-	this.init(this.xPath);
+class Province extends LinkageMenu{
+	constructor(sOffset, sId, sName, sVal) {
+		super(sOffset, sId, sName, sVal);
+		this.xPath = '//province';
+		this.init(this.xPath);
+	}
+	/**
+	 * 省市联动
+	 *
+	 * @param {City}
+	 *            oCity 联动市对象
+	 */
+	linkCity(oCity){
+
+		oCity.xPath = "//province[@name='&var']/city";
+
+		// 指定当前province绑定的city
+		LinkageMenu["link_" + this.id] = oCity;
+
+		this.htmlSelect.select.onchange = this.change;
+		 
+		if (this.val) {
+			var sXpath = oCity.xPath.replace("&var", this.val);
+			oCity.init(sXpath);
+		}
+	}
 }
 
-Province.prototype = new LinkageMenu();
-
-/**
- * 省市联动
- *
- * @param {City}
- *            oCity 联动市对象
- */
-Province.prototype.linkCity = function(oCity) {
-	oCity.xPath = "//province[@name='&var']/city";
-
-	// 指定当前province绑定的city
-	LinkageMenu["link_" + this.id] = oCity;
-
-	this.htmlSelect.select.onchange = this.change;
-	if (this.val) {
-		var sXpath = oCity.xPath.replace("&var", this.val);
-		oCity.init(sXpath);
-	}
-};
 /**
  * 市下拉对象
  *
@@ -288,35 +263,38 @@ Province.prototype.linkCity = function(oCity) {
  * @extends {LinkageMenu}
  * @returns {City}
  */
-function City(sOffset, sId, sName, sVal, isInit, province) {
-	LinkageMenu.call(this, sOffset, sId, sName, sVal);
+class City extends LinkageMenu {
 
-	this.xPath = province ? "//province[@name='" + province + "']/city" : "//city";
+	constructor(sOffset, sId, sName, sVal, isInit, province){
+		super(sOffset, sId, sName, sVal);
 
-	if (isInit) {
-		this.init(this.xPath);
+		this.xPath = province ? "//province[@name='" + province + "']/city" : '//city';
+
+		if (isInit) {
+			this.init(this.xPath);
+		}
 	}
 
+	/**
+	 * 市区联动
+	 *
+	 * @param {Area}
+	 *            oArea 区对象
+	 */
+	linkArea(oArea){
+		oArea.xPath = "//city[@name='&var']/country";
+		LinkageMenu["link_" + this.id] = oArea;
+		// // 指定当前city绑定的area
+		this.htmlSelect.select.onchange = this.change;
+ 
+		if (this.val) {
+			oArea.htmlSelect.cleanOptions();
+			var sXpath = oArea.xPath.replace("&var", this.val);
+			oArea.init(sXpath);
+		}
+	}
 }
-
-City.prototype = new LinkageMenu();
-/**
- * 市区联动
- *
- * @param {Area}
- *            oArea 区对象
- */
-City.prototype.linkArea = function(oArea) {
-	oArea.xPath = "//city[@name='&var']/country";
-	LinkageMenu["link_" + this.id] = oArea;
-	// // 指定当前city绑定的area
-	this.htmlSelect.select.onchange = this.change;
-	if (this.val) {
-		oArea.htmlSelect.cleanOptions();
-		var sXpath = oArea.xPath.replace("&var", this.val);
-		oArea.init(sXpath);
-	}
-};
+ 
 /**
  * 地区下拉对象
  *
@@ -341,14 +319,13 @@ City.prototype.linkArea = function(oArea) {
  * @extends {LinkageMenu}
  * @returns {Area}
  */
-function Area(sOffset, sId, sName, sVal, isInit, city) {
-	LinkageMenu.call(this, sOffset, sId, sName, sVal);
+class Area extends LinkageMenu {
+	constructor(sOffset, sId, sName, sVal, isInit, city){
+		super(sOffset, sId, sName, sVal);
+		this.xPath = city ? "//city[@name='" + city + "']/country" : '//country';
 
-	this.xPath = city ? "//city[@name='" + city + "']/country" : "//country";
-
-	if (isInit) {
-		this.init(this.xPath);
+		if (isInit) {
+			this.init(this.xPath);
+		}
 	}
 }
-
-Area.prototype = new LinkageMenu();
