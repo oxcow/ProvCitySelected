@@ -6,11 +6,20 @@
  *
  * @returns {Doccumnt Object} xml文档对象
  */
-function loadxml() {
-	var start = +new Date();
-	var oXmlDom = XmlDom();
+ const loadXMLPromise = new Promise((resolve, reject)=>{
+	const start = +new Date();
+	let oXmlDom = XmlDom();
 	if ( typeof (oXmlDom.load) == 'undefined') {
-		var xmlhttp = new XMLHttpRequest();
+		const client = new XMLHttpRequest();
+		client.onload = function(){
+			if( this.status == 200 && this.responseXML != null){
+				resolve(this.responseXML);
+				console.log(`load xml spend: ${+new Date() - start} ms`);
+			} else {
+				console.warn('load xml error!');
+				reject(new Error(`load xml failure! status ${this.status}`));
+			}
+		}
 		/*
 		 * when set async eq true and load local xml file,the chrome will throw excption
 		 * "XMLHttpRequest cannot load file:///...areadata.xml.
@@ -20,16 +29,13 @@ function loadxml() {
 		 * "Uncaught Error: NETWORK_ERR: XMLHttpRequest Exception 101" in addition to the above"
 		 *
 		 */
-		xmlhttp.open("POST", "areadata.xml", false);
-		xmlhttp.setRequestHeader('Content-Type', 'application/xml');
-		xmlhttp.send(null);
-		oXmlDom = xmlhttp.responseXML;
+		client.open('POST', 'areadata.xml'); // 异步读取数据文件
+		client.setRequestHeader('Content-Type', 'application/xml');
+		client.send();
 	} else {
-		oXmlDom.load("areadata.xml");
+		resolve(oXmlDom.load('areadata.xml'));
 	}
-	console.log(`load xml spend: ${+new Date() - start} ms`);
-	return oXmlDom;
-}
+})
 
 /**
  * html select 标签类
@@ -125,12 +131,13 @@ class HtmlSelect {
  */
 class LinkageMenu{
 	constructor(sOffset, sId, sName, sVal) {
-		this.xml = LinkageMenu.xml ? LinkageMenu.xml : loadxml();
+		//this.xml = LinkageMenu.xml ? LinkageMenu.xml : loadxml();
 		this.offset = sOffset;
 		this.id = sId;
 		this.name = sName;
 		this.val = sVal;
 		this.htmlSelect = new HtmlSelect(this.id, this.name, this.val);
+		this.xmlPromise = loadXMLPromise;
 	}
 	/**
 	 * 初始化数据并显示在页面指定元素中
@@ -139,17 +146,22 @@ class LinkageMenu{
 	 *            xPath xPath表达式
 	 */
 	init(xPath) {
+		this.xmlPromise.then(allXmlData => {
+			this.xml = allXmlData;
+			var xmlData = this.xml.documentElement.selectNodes(xPath);
 
-		var xmlData = this.xml.documentElement.selectNodes(xPath);
-
-		if (!this.val && xmlData[0]) {// 如果没有默认值，则将第一个元素设置为默认值
-			this.val = xmlData[0].getAttribute('name');
-			this.htmlSelect.val = this.val;
-		}
-		for (var i = 0; i < xmlData.length; i++) {
-			this.htmlSelect.addOption(xmlData[i].getAttribute('name'), xmlData[i].getAttribute('name'));
-		}
-		this.htmlSelect.showHtml(this.offset);
+			if (!this.val && xmlData[0]) {// 如果没有默认值，则将第一个元素设置为默认值
+				this.val = xmlData[0].getAttribute('name');
+				this.htmlSelect.val = this.val;
+			}
+			if(this.val && this.link){
+				this.link.val = this.val;
+			}
+			for (var i = 0; i < xmlData.length; i++) {
+				this.htmlSelect.addOption(xmlData[i].getAttribute('name'), xmlData[i].getAttribute('name'));
+			}
+			this.htmlSelect.showHtml(this.offset);
+		})
 		
 	}
 
@@ -191,11 +203,6 @@ class LinkageMenu{
 }
 
 /**
- * 伪静态areadata.xml数据变量
- */
-LinkageMenu.xml = loadxml();
-
-/**
  * 省份下拉对象
  *
  * @param {string}
@@ -224,17 +231,28 @@ class Province extends LinkageMenu{
 	 */
 	linkCity(oCity){
 
-		oCity.xPath = "//province[@name='&var']/city";
+		let oCityProxy = new Proxy(oCity,{
+			set(target, key, value, receiver){
+				console.log('set ',key," = ", value);
+				if(key === 'val'){
+					if(value){
+						console.log("proxy link city, province is:", value);
+						var sXpath = oCityProxy.xPath.replace("&var", value);
+						oCityProxy.init(sXpath);
+					}
+				}
+				return Reflect.set(target, key, value, receiver)
+			}
+		})
 
+		oCityProxy.xPath = "//province[@name='&var']/city";
+
+		this.link = oCityProxy;
+		
 		// 指定当前province绑定的city
-		LinkageMenu["link_" + this.id] = oCity;
+		LinkageMenu["link_" + this.id] = oCityProxy;
 
 		this.htmlSelect.select.onchange = this.change;
-		 
-		if (this.val) {
-			var sXpath = oCity.xPath.replace("&var", this.val);
-			oCity.init(sXpath);
-		}
 	}
 }
 
@@ -274,7 +292,7 @@ class City extends LinkageMenu {
 			this.init(this.xPath);
 		}
 	}
-
+	
 	/**
 	 * 市区联动
 	 *
@@ -282,16 +300,25 @@ class City extends LinkageMenu {
 	 *            oArea 区对象
 	 */
 	linkArea(oArea){
-		oArea.xPath = "//city[@name='&var']/country";
-		LinkageMenu["link_" + this.id] = oArea;
+		let oAreaProxy = new Proxy(oArea,{
+			set(target, key, value, receiver){
+				console.log('set ',key," = ", value);
+				if(key === 'val'){
+					if(value){
+						console.log("proxy link area, city is:", value);
+						oAreaProxy.htmlSelect.cleanOptions();
+						var sXpath = oAreaProxy.xPath.replace("&var", value);
+						oAreaProxy.init(sXpath);
+					}
+				}
+				return Reflect.set(target, key, value, receiver)
+			}
+		})
+		oAreaProxy.xPath = "//city[@name='&var']/country";
+		this.link = oAreaProxy;
+		LinkageMenu["link_" + this.id] = oAreaProxy;
 		// // 指定当前city绑定的area
 		this.htmlSelect.select.onchange = this.change;
- 
-		if (this.val) {
-			oArea.htmlSelect.cleanOptions();
-			var sXpath = oArea.xPath.replace("&var", this.val);
-			oArea.init(sXpath);
-		}
 	}
 }
  
