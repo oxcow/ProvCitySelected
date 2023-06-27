@@ -1,139 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<title>省市区联动菜单</title>
-		<script type="text/javascript" src="loadxml.js"></script>
-		<script type="text/javascript" src="areaselected.js"></script>
-		<script type="text/javascript">
-			window.onload = function() {
-				var singleProN = new Province('single_pro_n', 'sp_1', 'sp1');
-				//单独取省(有默认值)
-				var singleProY = new Province('single_pro_y', 'sp_2', 'sp2', '吉林省');
+<head>
+  <meta charset="UTF-8">
+  <title>省市区联动菜单</title>
+  <script type="module">
+    import {Province, City, Area} from './PCAComponent.js';
 
-				//单独取市（指定省份[吉林省]，无默认值）
-				var singleCityByProN = new City('single_cit_p_n', 'scp_1', 'scp1', '', true, '吉林省');
+    window.onload = function() {
+      const singleProN = new Province('single_pro_n', 'sp_1', 'sp1');
+      //单独取省(有默认值)
+      const singleProY = new Province('single_pro_y', 'sp_2', 'sp2', '吉林省');
 
-				//单独取市（指定省份[吉林省]，有默认值）
-				var singleCityByProY = new City('single_cit_p_y', 'scp_2', 'scp2', '白城市', true, '吉林省');
+      //单独取市（指定省份[吉林省]，无默认值）
+      const singleCityByProN = new City('single_cit_p_n', 'scp_1', 'scp1', '', true, '吉林省');
 
-				//单独取市(无默认值)
-				var singleCityN = new City('single_cit_n', 'sc_1', 'sc1', '', true);
+      //单独取市（指定省份[吉林省]，有默认值）
+      const singleCityByProY = new City('single_cit_p_y', 'scp_2', 'scp2', '白城市', true, '吉林省');
 
-				//单独取市(有默认值)
-				var singleCityY = new City('single_cit_y', 'sc_2', 'sc2', '天津辖区', true);
+      //单独取市(无默认值)
+      const singleCityN = new City('single_cit_n', 'sc_1', 'sc1', '', true);
 
-				//单独取地区（指定市[大同市]，无默认值）
-				var singleAreaByCityN = new Area('single_area_p_n', 'sap_1', 'sap1', '', true, '大同市');
+      //单独取市(有默认值)
+      const singleCityY = new City('single_cit_y', 'sc_2', 'sc2', '天津辖区', true);
 
-				//单独取地区（指定市[大同市]，有默认值）
-				var singleAreaByCityY = new Area('single_area_p_y', 'sap_2', 'sap2', '广陵县', true, '大同市');
+      //单独取地区（指定市[大同市]，无默认值）
+      const singleAreaByCityN = new Area('single_area_p_n', 'sap_1', 'sap1', '', true, '大同市');
 
-				//单独取地区(无默认值) // 信息量大，因此在加载的时候比较慢，不过FF相对于IE比较快
-				var singleAreaN = new Area('single_area_n', 'sa_1', 'sa1', '', true);
-				//单独取地区(有默认值)
-				var singleAreaY = new Area('single_area_y', 'sa_2', 'sa2', '海淀区', true);
+      //单独取地区（指定市[大同市]，有默认值）
+      const singleAreaByCityY = new Area('single_area_p_y', 'sap_2', 'sap2', '广陵县', true, '大同市');
 
-				//省市联动（无默认值）
-				var pcProN = new Province('pc_p_n', 'pcp_1', 'pcp1');
-				var pcCityN = new City('pc_c_n', 'pcc_1', 'pcc1');
-				pcProN.linkCity(pcCityN);
-				//省市联动（有默认值）
-				var pcProY = new Province('pc_p_y', 'pcp_2', 'pcp2', "江苏省");
-				var pcCityY = new City('pc_c_y', 'pcc_2', 'pcc2', "常州市");
-				pcProY.linkCity(pcCityY);
+      //单独取地区(无默认值) // 信息量大，因此在加载的时候比较慢，不过FF相对于IE比较快
+      const singleAreaN = new Area('single_area_n', 'sa_1', 'sa1', '', true);
+      //单独取地区(有默认值)
+      const singleAreaY = new Area('single_area_y', 'sa_2', 'sa2', '海淀区', true);
 
-				//市地区联动(无默认值)
-				var caCityN = new City('ca_c_n', 'cac_1', 'cac1', '', true);
-				var caAreaN = new Area('ca_a_n', 'caa_1', 'caa1');
-				caCityN.linkArea(caAreaN);
-				//市地区联动(有默认值)
-				var caCityY = new City('ca_c_y', 'cac_2', 'cac2', "唐山市", true);
-				var caAreaY = new Area('ca_a_y', 'caa_2', 'caa2', '丰南区');
-				caCityY.linkArea(caAreaY);
+      //省市联动（无默认值）
+      const pcProN = new Province('pc_p_n', 'pcp_1', 'pcp1');
+      const pcCityN = new City('pc_c_n', 'pcc_1', 'pcc1');
+      pcProN.linkCity(pcCityN);
+      //省市联动（有默认值）
+      const pcProY = new Province('pc_p_y', 'pcp_2', 'pcp2', "江苏省");
+      const pcCityY = new City('pc_c_y', 'pcc_2', 'pcc2', "常州市");
+      pcProY.linkCity(pcCityY);
 
-				//省市地区联动（无默认值）
-				var lp = new Province('lp', 'lp_1', 'lp');
-				var lc = new City('lc', 'lc_1', 'lc');
-				var la = new Area('la', 'la_1', 'la', '', false);
-				lp.linkCity(lc);
-				lc.linkArea(la);
+      //市地区联动(无默认值)
+      const caCityN = new City('ca_c_n', 'cac_1', 'cac1', '', true);
+      const caAreaN = new Area('ca_a_n', 'caa_1', 'caa1');
+      caCityN.linkArea(caAreaN);
+      //市地区联动(有默认值)
+      const caCityY = new City('ca_c_y', 'cac_2', 'cac2', "唐山市", true);
+      const caAreaY = new Area('ca_a_y', 'caa_2', 'caa2', '丰南区');
+      caCityY.linkArea(caAreaY);
 
-				//省市地区联动（有默认值）
-				var lp1 = new Province('lp1', 'lp1_1', 'lp1', '湖南省');
-				var lc1 = new City('lc1', 'lc1_1', 'lc1', '湘潭市');
-				var la1 = new Area('la1', 'la1_1', 'la1', '', false);
-				lp1.linkCity(lc1);
-				lc1.linkArea(la1);
-			}
-		</script>
-	</head>
-	<body>
-		<fieldset>
-			<legend>
-				单独取省
-			</legend>
-			无默认值： <span id="single_pro_n"></span>
-			有默认值： <span id="single_pro_y"></span>
-		</fieldset>
-		<br />
-		<fieldset>
-			<legend>
-				单独取市，不指定省份
-			</legend>
-			无默认值： <span id="single_cit_n"></span>
-			有默认值: <span id="single_cit_y"></span>
-		</fieldset>
-		<br/>
-		<fieldset>
-			<legend>
-				单独取市，指定省份
-			</legend>
-			无默认值： <span id="single_cit_p_n"></span>
-			有默认值: <span id="single_cit_p_y"></span>
-		</fieldset>
+      //省市地区联动（无默认值）
+      const lp = new Province('lp', 'lp_1', 'lp');
+      const lc = new City('lc', 'lc_1', 'lc');
+      const la = new Area('la', 'la_1', 'la', '', false);
+      lp.linkCity(lc);
+      lc.linkArea(la);
 
-		<br />
-		<fieldset>
-			<legend>
-				单独取地区，指定市
-			</legend>
-			无默认值： <span id="single_area_p_n"></span>
-			有默认值: <span id="single_area_p_y"></span>
-		</fieldset>
-		<br />
+      //省市地区联动（有默认值）
+      const lp1 = new Province('lp1', 'lp1_1', 'lp1', '湖南省');
+      const lc1 = new City('lc1', 'lc1_1', 'lc1', '湘潭市');
+      const la1 = new Area('la1', 'la1_1', 'la1', '', false);
+      lp1.linkCity(lc1);
+      lc1.linkArea(la1);
+    }
+  </script>
+</head>
+<body>
+<fieldset>
+  <legend>
+    单独取省
+  </legend>
+  无默认值： <span id="single_pro_n"></span>
+  有默认值： <span id="single_pro_y"></span>
+</fieldset>
+<br/>
+<fieldset>
+  <legend>
+    单独取市，不指定省份
+  </legend>
+  无默认值： <span id="single_cit_n"></span>
+  有默认值: <span id="single_cit_y"></span>
+</fieldset>
+<br/>
+<fieldset>
+  <legend>
+    单独取市，指定省份
+  </legend>
+  无默认值： <span id="single_cit_p_n"></span>
+  有默认值: <span id="single_cit_p_y"></span>
+</fieldset>
 
-		<fieldset>
-			<legend>
-				单独取地区
-			</legend>
-			无默认值： <span
-			id="single_area_n"></span> 有默认值: <span id="single_area_y"></span>
-		</fieldset>
-		<br />
-		<fieldset>
-			<legend>
-				省市联动
-			</legend>
-			无默认值： <span id="pc_p_n"></span><span
-			id="pc_c_n"></span> 有默认值: <span id="pc_p_y"></span><span id="pc_c_y"></span>
-		</fieldset>
-		<br />
-		<fieldset>
-			<legend>
-				市地区联动
-			</legend>
-			无默认值： <span id="ca_c_n"></span><span
-			id="ca_a_n"></span> 有默认值: <span id="ca_c_y"></span><span id="ca_a_y"></span>
-		</fieldset>
-		<br />
-		<fieldset>
-			<legend>
-				市地区联动
-			</legend>
-			无默认值： <span id="lp"></span><span
-			id="lc"></span><span id="la"></span> 有默认值: <span id="lp1"></span><span
-			id="lc1"></span><span id="la1"></span>
-		</fieldset>
-	</body>
+<br/>
+<fieldset>
+  <legend>
+    单独取地区，指定市
+  </legend>
+  无默认值： <span id="single_area_p_n"></span>
+  有默认值: <span id="single_area_p_y"></span>
+</fieldset>
+<br/>
+
+<fieldset>
+  <legend>
+    单独取地区
+  </legend>
+  无默认值： <span
+    id="single_area_n"></span> 有默认值: <span id="single_area_y"></span>
+</fieldset>
+<br/>
+<fieldset>
+  <legend>
+    省市联动
+  </legend>
+  无默认值： <span id="pc_p_n"></span><span
+    id="pc_c_n"></span> 有默认值: <span id="pc_p_y"></span><span id="pc_c_y"></span>
+</fieldset>
+<br/>
+<fieldset>
+  <legend>
+    市地区联动
+  </legend>
+  无默认值： <span id="ca_c_n"></span><span
+    id="ca_a_n"></span> 有默认值: <span id="ca_c_y"></span><span id="ca_a_y"></span>
+</fieldset>
+<br/>
+<fieldset>
+  <legend>
+    市地区联动
+  </legend>
+  无默认值： <span id="lp"></span><span
+    id="lc"></span><span id="la"></span> 有默认值: <span id="lp1"></span><span
+    id="lc1"></span><span id="la1"></span>
+</fieldset>
+</body>
 </html>

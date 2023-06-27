@@ -1,6 +1,6 @@
 # 省市地区三级联动选择
 
-该项目为建立省市地区三级联动菜单。数据依赖于 areadata.xml 提供的 xml 格式数据。
+该项目为建立省市地区三级联动菜单。数据依赖于 data.xml 提供的 xml 格式数据。
 
 整个代码使用面向对象方式进行编写，对于xml数据搜索使用到了xpath
 
@@ -13,11 +13,11 @@
 
 
 #### 文件清单
-- areadata.xml 为省市地区数据
+- data.xml 为省市地区数据
 
-- loadxml.js 为 js 读取 xml处理脚本
+- loadXML.js 为 js 读取XML处理脚本
 
-- areaselected.js 为联动菜单处理脚本
+- PCAComponent.js 为联动菜单处理脚本
 
 - demo.html 为完整的省市页面调用示例
 
